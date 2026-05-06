@@ -397,7 +397,7 @@ export default function TimetableView({ currentLab, generatedData }) {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm animate-fade-in">
           <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 max-w-md w-full p-6 m-4 transform scale-100 transition-all duration-300">
             <div className="flex items-start gap-4">
-              <div className={`p-3 rounded-full ${modal.type === 'alert' ? 'bg-indigo-50 text-indigo-600' : 'bg-blue-50 text-blue-600'}`}>
+              <div className={`p-3 rounded-full ${modal.type === 'alert' ? 'bg-blue-50 text-blue-600' : 'bg-blue-50 text-blue-600'}`}>
                 {modal.type === 'alert' ? (
                   <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -416,7 +416,7 @@ export default function TimetableView({ currentLab, generatedData }) {
                     type="text"
                     id="modal-prompt-input"
                     defaultValue={modal.defaultValue}
-                    className="mt-3 w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition text-sm text-gray-900"
+                    className="mt-3 w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition text-sm text-gray-900"
                     placeholder="Enter name..."
                     autoFocus
                     onKeyDown={(e) => {
@@ -445,7 +445,7 @@ export default function TimetableView({ currentLab, generatedData }) {
                   setModal({ ...modal, isOpen: false });
                   if (modal.onConfirm) modal.onConfirm(val || modal.defaultValue);
                 }}
-                className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-sm transition"
+                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition"
               >
                 {modal.type === 'prompt' ? 'Save' : 'OK'}
               </button>

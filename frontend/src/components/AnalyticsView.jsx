@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-export default function AnalyticsView() {
+export default function AnalyticsView({ initialTab = 'workloads' }) {
   const [data, setData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -49,15 +49,19 @@ export default function AnalyticsView() {
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-8">
       {/* Header Banner */}
-      <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-indigo-950 text-white p-8 rounded-2xl shadow-lg border border-slate-700 relative overflow-hidden">
+      <div className="bg-gradient-to-r from-blue-50 via-slate-50 to-blue-50/30 text-slate-900 p-8 rounded-2xl shadow-sm border border-blue-100 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-80 h-80 bg-blue-500/5 rounded-full blur-3xl -mr-16 -mt-16"></div>
         <div className="relative z-10 space-y-2">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-xs font-semibold uppercase tracking-wider text-indigo-100 border border-white/5">
-            📊 Executive Insights
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-100/70 text-xs font-semibold uppercase tracking-wider text-blue-800 border border-blue-200/50">
+            {initialTab === 'workloads' ? '📊 Workload Audit' : '📈 Allocation Weights'}
           </div>
-          <h2 className="text-3xl font-extrabold tracking-tight">Workload & Faculty Analytics</h2>
-          <p className="text-indigo-200 max-w-xl text-sm leading-relaxed">
-            Monitor real-time resource allocations, inspect faculty balance factors, and prevent teacher burnout with live college-wide timetabling audit dashboards.
+          <h2 className="text-3xl font-extrabold tracking-tight text-slate-900">
+            {initialTab === 'workloads' ? 'Workload Analytics' : 'Usage Insights'}
+          </h2>
+          <p className="text-slate-500 max-w-xl text-sm leading-relaxed">
+            {initialTab === 'workloads' 
+              ? 'Monitor real-time resource allocations, inspect faculty balance factors, and prevent teacher burnout with live college-wide timetabling audit dashboards.'
+              : 'Inspect subject period densities, class requirements, and curriculum balance statistics.'}
           </p>
         </div>
       </div>
@@ -96,7 +100,7 @@ export default function AnalyticsView() {
             <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Scheduled Periods</p>
             <h3 className="text-3xl font-bold text-gray-900">{kpis.allocated_hours}</h3>
           </div>
-          <div className="w-12 h-12 bg-indigo-50 rounded-lg text-indigo-600 flex items-center justify-center">
+          <div className="w-12 h-12 bg-blue-50 rounded-lg text-blue-600 flex items-center justify-center">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
@@ -117,9 +121,9 @@ export default function AnalyticsView() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left column: Faculty Workload Balancer Progress bars */}
-        <div className="lg:col-span-2 bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-6">
+      {initialTab === 'workloads' ? (
+        /* Workload View - Faculty Balance Register takes full stage */
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-6">
           <div className="border-b border-gray-100 pb-4">
             <h3 className="text-lg font-bold text-gray-900">Faculty Balance Register</h3>
             <p className="text-xs text-gray-500 mt-1">Live workload tracking with smart alert thresholds.</p>
@@ -131,7 +135,6 @@ export default function AnalyticsView() {
             ) : (
               faculties.map((fac) => {
                 const status = getWorkloadStatus(fac.hours);
-                // Assume 20 hours is the standard maximum limit for percentage calculation
                 const pct = Math.min((fac.hours / 20) * 100, 100);
                 return (
                   <div key={fac.name} className="space-y-2">
@@ -156,31 +159,30 @@ export default function AnalyticsView() {
             )}
           </div>
         </div>
-
-        {/* Right column: Subject Credit Distribution */}
+      ) : (
+        /* Insights View - Subject distribution in a beautiful wide layout grid */
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-6">
           <div className="border-b border-gray-100 pb-4">
             <h3 className="text-lg font-bold text-gray-900">Subject Distribution</h3>
             <p className="text-xs text-gray-500 mt-1">Allocation weights of syllabus components.</p>
           </div>
 
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {subjects.length === 0 ? (
-              <p className="text-center text-gray-400 py-6">No subjects tracked yet.</p>
+              <p className="text-center text-gray-400 col-span-full py-6">No subjects tracked yet.</p>
             ) : (
               subjects.map((subj) => {
-                // Calculate percentage based on total periods allocated
                 const totalHours = kpis.allocated_hours || 1;
                 const pct = Math.round((subj.hours / totalHours) * 100);
                 return (
-                  <div key={subj.code} className="flex justify-between items-center text-sm p-2 rounded hover:bg-gray-50 transition">
+                  <div key={subj.code} className="flex justify-between items-center text-sm p-4 rounded-xl bg-slate-50 border border-slate-100 hover:shadow-sm transition">
                     <div className="flex items-center gap-2">
-                      <div className="w-2.5 h-2.5 rounded-full bg-indigo-500"></div>
-                      <span className="font-semibold text-gray-800">{subj.code}</span>
+                      <div className="w-2.5 h-2.5 rounded-full bg-blue-500"></div>
+                      <span className="font-semibold text-slate-800">{subj.code}</span>
                     </div>
                     <div className="flex items-center gap-3 text-xs">
-                      <span className="text-gray-500 font-medium">{subj.sections.length} classes</span>
-                      <span className="font-bold text-gray-900 bg-indigo-50 px-2 py-0.5 rounded text-indigo-700">{pct}%</span>
+                      <span className="text-slate-500 font-medium">{subj.sections.length} classes</span>
+                      <span className="font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded">{pct}%</span>
                     </div>
                   </div>
                 );
@@ -188,7 +190,7 @@ export default function AnalyticsView() {
             )}
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

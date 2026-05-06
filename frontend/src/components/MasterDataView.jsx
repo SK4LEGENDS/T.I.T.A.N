@@ -36,34 +36,29 @@ export default function MasterDataView({ initialTab = 'faculty' }) {
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-6">
       {/* Header Banner */}
-      <div className="bg-gradient-to-r from-blue-700 via-indigo-800 to-indigo-900 text-white p-8 rounded-2xl shadow-lg border border-indigo-700 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-2xl -mr-16 -mt-16"></div>
+      <div className="bg-gradient-to-r from-blue-50 via-slate-50 to-blue-50/30 text-slate-900 p-8 rounded-2xl shadow-sm border border-blue-100 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 rounded-full blur-2xl -mr-16 -mt-16"></div>
         <div className="relative z-10 space-y-2">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-xs font-semibold uppercase tracking-wider text-blue-100 border border-white/5">
-            📂 College Control Panel
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-100/70 text-xs font-semibold uppercase tracking-wider text-blue-800 border border-blue-200/50">
+            {activeSubTab === 'faculty' ? '👥 Faculty Database' : '📚 Course Syllabus'}
           </div>
-          <h2 className="text-3xl font-extrabold tracking-tight">Master Records Registry</h2>
-          <p className="text-indigo-100 max-w-xl text-sm leading-relaxed">
-            Manage, search, and audit your academic registers. This directory aggregates all saved schedules to compile unique teacher directories and syllabi mappings.
+          <h2 className="text-3xl font-extrabold tracking-tight text-slate-900">
+            {activeSubTab === 'faculty' ? 'Faculty Directory' : 'Subject Syllabus'}
+          </h2>
+          <p className="text-slate-500 max-w-xl text-sm leading-relaxed">
+            {activeSubTab === 'faculty' 
+              ? 'Manage, search, and audit your academic teacher directory, weekly hours tracking, and assigned sections.'
+              : 'Manage, search, and audit core syllabus credits, departments, and assigned instructors.'}
           </p>
         </div>
       </div>
 
-      {/* Tabs & Search Controls */}
+      {/* Search Controls & Stats */}
       <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4 bg-white p-4 rounded-xl shadow-sm border border-gray-200">
-        <div className="flex bg-gray-100 p-1 rounded-lg self-start">
-          <button
-            onClick={() => { setActiveSubTab('faculty'); setSearchQuery(''); }}
-            className={`px-4 py-2 text-sm font-semibold rounded-md transition ${activeSubTab === 'faculty' ? 'bg-white text-gray-900 shadow' : 'text-gray-500 hover:text-gray-950'}`}
-          >
-            👥 Faculty Directory
-          </button>
-          <button
-            onClick={() => { setActiveSubTab('subjects'); setSearchQuery(''); }}
-            className={`px-4 py-2 text-sm font-semibold rounded-md transition ${activeSubTab === 'subjects' ? 'bg-white text-gray-900 shadow' : 'text-gray-500 hover:text-gray-950'}`}
-          >
-            📚 Subject Syllabus
-          </button>
+        <div className="flex items-center text-sm font-semibold text-slate-500 px-2">
+          <span>
+            Showing {activeSubTab === 'faculty' ? filteredFaculties.length : filteredSubjects.length} verified records
+          </span>
         </div>
 
         <div className="relative flex-1 md:max-w-md">
@@ -150,20 +145,20 @@ export default function MasterDataView({ initialTab = 'faculty' }) {
             {filteredSubjects.map(subj => (
               <div 
                 key={subj.code} 
-                className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex flex-col justify-between hover:shadow-md hover:border-indigo-300 transition duration-300 group"
+                className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex flex-col justify-between hover:shadow-md hover:border-blue-300 transition duration-300 group"
               >
                 <div className="space-y-4">
                   <div className="flex justify-between items-start">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-lg">
+                      <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-lg">
                         {subj.code.substring(0, 2).toUpperCase()}
                       </div>
                       <div>
-                        <h3 className="font-bold text-gray-900 group-hover:text-indigo-600 transition">{subj.code}</h3>
+                        <h3 className="font-bold text-gray-900 group-hover:text-blue-600 transition">{subj.code}</h3>
                         <p className="text-xs text-gray-500">Core Engineering Curriculum</p>
                       </div>
                     </div>
-                    <div className="px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-semibold border border-indigo-100">
+                    <div className="px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold border border-blue-100">
                       {subj.hours} Credits
                     </div>
                   </div>
@@ -172,7 +167,7 @@ export default function MasterDataView({ initialTab = 'faculty' }) {
                     <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Assigned Instructors</h4>
                     <div className="flex flex-wrap gap-1.5">
                       {subj.faculties.map(fac => (
-                        <span key={fac} className="px-2 py-0.5 rounded bg-gray-50 text-indigo-700 text-xs font-medium border border-indigo-100">
+                        <span key={fac} className="px-2 py-0.5 rounded bg-gray-50 text-blue-700 text-xs font-medium border border-blue-100">
                           👤 {fac}
                         </span>
                       ))}

@@ -4,8 +4,14 @@ import TimetableView from './components/TimetableView';
 import Sidebar from './components/Sidebar';
 import MasterDataView from './components/MasterDataView';
 import AnalyticsView from './components/AnalyticsView';
+import SettingsView from './components/SettingsView';
+import LandingPage from './components/LandingPage';
+import LoginPage from './components/LoginPage';
 
 function App() {
+  const [authStage, setAuthStage] = useState(() => {
+    return localStorage.getItem('is_logged_in') === 'true' ? 'app' : 'landing';
+  });
   const [currentView, setCurrentView] = useState('upload');
   const [currentLab, setCurrentLab] = useState({ id: 'home', name: 'New Timetable' });
   const [generatedData, setGeneratedData] = useState(null);
@@ -71,47 +77,69 @@ function App() {
       return <MasterDataView initialTab={initialTab} key={currentLab.id} />;
     }
     
+    if (currentLab.id === 'settings') {
+      return <SettingsView />;
+    }
+
     if (currentLab.id.startsWith('analytics-')) {
-      return <AnalyticsView key={currentLab.id} />;
+      const initialTab = currentLab.id === 'analytics-insights' ? 'insights' : 'workloads';
+      return <AnalyticsView initialTab={initialTab} key={currentLab.id} />;
     }
 
     // Default to timetable view for drafts, archives, and unknown IDs
     return <TimetableView currentLab={currentLab} generatedData={generatedData} />;
   };
 
+  if (authStage === 'landing') {
+    return (
+      <LandingPage 
+        onGetStarted={() => setAuthStage('login')} 
+        onLoginClick={() => setAuthStage('login')} 
+      />
+    );
+  }
+
+  if (authStage === 'login') {
+    return (
+      <LoginPage 
+        onLoginSuccess={() => {
+          localStorage.setItem('is_logged_in', 'true');
+          setAuthStage('app');
+        }}
+        onBackToHome={() => setAuthStage('landing')}
+      />
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900 font-sans flex overflow-hidden relative">
-      <Sidebar onSelectHistory={handleHistorySelect} activeItemId={currentLab.id} />
-      <div className="flex-1 flex flex-col min-h-screen overflow-y-auto">
-        <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
-            <div className="flex items-center">
-              <div className="flex-shrink-0 flex items-center gap-2">
-                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                </div>
-                <span className="font-bold text-xl text-gray-900 tracking-tight">Smart Timetable</span>
+    <div className="h-screen bg-slate-50 text-slate-900 font-sans flex overflow-hidden relative">
+      <Sidebar 
+        onSelectHistory={handleHistorySelect} 
+        activeItemId={currentLab.id} 
+        onLogout={() => {
+          localStorage.removeItem('is_logged_in');
+          setAuthStage('landing');
+        }}
+      />
+      <div className="flex-1 flex flex-col h-full overflow-y-auto">
+        {currentView === 'timetable' && (
+          <header className="bg-white shadow-sm border-b border-gray-200">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="flex justify-end h-16 items-center">
+                <button 
+                  onClick={() => {
+                    setGeneratedData(null);
+                    setCurrentView('upload');
+                    setCurrentLab({ id: 'home', name: 'New Timetable' });
+                  }}
+                  className="text-sm font-medium text-gray-500 hover:text-gray-900 transition"
+                >
+                  Start Over
+                </button>
               </div>
             </div>
-            
-            {currentView === 'timetable' && (
-              <button 
-                onClick={() => {
-                  setGeneratedData(null);
-                  setCurrentView('upload');
-                  setCurrentLab({ id: 'home', name: 'New Timetable' });
-                }}
-                className="text-sm font-medium text-gray-500 hover:text-gray-900 transition"
-              >
-                Start Over
-              </button>
-            )}
-          </div>
-        </div>
-      </header>
+          </header>
+        )}
 
       <main>
         {renderContent()}
@@ -134,7 +162,7 @@ function App() {
             <div className="mt-6 flex justify-end">
               <button
                 onClick={() => setErrorModal({ ...errorModal, isOpen: false })}
-                className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-sm transition"
+                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition"
               >
                 Dismiss
               </button>

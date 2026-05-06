@@ -2,7 +2,11 @@ import sqlite3
 import json
 import os
 
-DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "timetable.db")
+DB_PATH = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+    "database",
+    "timetable.db"
+)
 
 def init_db():
     os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
