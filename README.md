@@ -1,19 +1,21 @@
-# 🗓️ Smart Timetable Bot
+# 🗓️ T.I.T.A.N. — Timetable Intelligent Technology & Agentic Negotiator
 
-An intelligent, AI-powered academic scheduling and conflict-free timetable generator built with **React**, **FastAPI**, and **PydanticAI** (powered by **Groq** and **Llama 3.3 70B**).
+An advanced, AI-powered academic scheduling and conflict-free timetable generator built with **React**, **FastAPI**, and **PydanticAI** (powered by **Groq** and **Llama 3.3 70B**).
 
 The application provides an agentic AI solution that analyzes academic constraints (faculty, subjects, timeslots, and days) and generates beautifully randomized, balanced, and complete multi-section timetables without conflicts or teacher overloads.
 
 ---
 
-## 🚀 Key Features
+## 🚀 Key Features & Latest Enhancements
 
-*   **Agentic AI Engine**: Powered by **PydanticAI** and **Llama 3.3 (70B) via Groq** to intelligently negotiate scheduling conflicts and assign optimal faculty-to-subject combinations.
+*   **Agentic AI Engine (Powered by PydanticAI)**: Leverages **Llama 3.3 (70B) via Groq** to intelligently negotiate scheduling conflicts and assign optimal faculty-to-subject combinations.
 *   **Conflict & Overlap Resolution**: Strict validation to ensure no faculty is scheduled for multiple sections at the same day and timeslot (utilizing multi-section busy maps).
 *   **Balanced Faculty Workloads**: Distributes hours evenly and respects workload caps across academic departments.
-*   **Modern Premium UI**: Sleek, fully responsive light-themed dashboard with Glassmorphism, animations, real-time analytics, and dynamic timetable grids.
+*   **🆕 Sleek Landing Page**: A gorgeous, interactive product landing page featuring an active, animated CSS laptop sandbox simulation demonstrating the agentic auto-solving algorithm.
+*   **🆕 Simulation & Login Views**: Premium simulation modules including an administrative **Login Page** and **Settings Panel** for enterprise dashboard management.
+*   **🆕 Modern Premium UI**: Fully responsive light-themed dashboard with Glassmorphism, micro-animations, real-time analytics, and dynamic timetable grids.
 *   **Dynamic CSV Parsing**: Instantly parse and analyze timeslots, subjects, and teacher constraints from CSV uploads.
-*   **Master Data & Analytics**: Manage department configurations, explore interactive stats, and filter timetables by Section, Semester, and Academic Year.
+*   **🆕 Centralized Database Infrastructure**: Re-architected SQLite database path from nested backend folders to a unified, top-level `database/` directory for cleaner git isolation and automated database backups.
 
 ---
 
@@ -23,14 +25,19 @@ The application provides an agentic AI solution that analyzes academic constrain
 Timetable_Bot/
 ├── backend/                  # FastAPI & Agentic AI Backend
 │   ├── agent/                # PydanticAI Agent configuration
-│   ├── database/             # SQLite DB manager & timetable.db
+│   ├── database/             # SQLite DB manager (configured for root database storage)
 │   ├── models/               # Pydantic schemas for structured inputs/outputs
 │   ├── main.py               # FastAPI router and server entrypoint
-│   ├── .env.example          # Template for backend environment variables
 │   └── requirements.txt      # Python dependencies
+├── database/                 # Centralized SQLite Storage (Ignored by Git)
+│   └── timetable.db          # Main local relational database
 ├── frontend/                 # Vite + React Frontend
 │   ├── src/                  # React components & UI logic
 │   │   ├── components/       # Reusable UI views (Upload, Grid, Analytics, Sidebar...)
+│   │   │   ├── LandingPage.jsx # 🆕 Sleek interactive product presentation
+│   │   │   ├── LoginPage.jsx   # 🆕 Simulative portal authentication
+│   │   │   ├── SettingsView.jsx# 🆕 Centralized UI and API preference panel
+│   │   │   └── ...
 │   │   └── App.jsx           # Main App entry and state management
 │   ├── package.json          # Frontend dependencies and Vite scripts
 │   └── vite.config.js        # Vite configuration
@@ -40,7 +47,7 @@ Timetable_Bot/
 
 ---
 
-## 🛠️ Quick Start
+## 🛠| Quick Start
 
 This project is fully orchestrated to run both the backend and frontend concurrently with a single command.
 
@@ -116,7 +123,7 @@ To push your fully configured local repository to your remote GitHub repository:
 1.  **Create a new, empty repository** on GitHub (do not initialize with README, license, or `.gitignore`).
 2.  **Add the remote origin URL** to your local repository:
     ```bash
-    git remote add origin https://github.com/your-username/your-repo-name.git
+    git remote add origin https://github.com/SK4LEGENDS/T.I.T.A.N.git
     ```
 3.  **Push the repository** to GitHub:
     ```bash
