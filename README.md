@@ -11,11 +11,11 @@ The application provides an agentic AI solution that analyzes academic constrain
 *   **Agentic AI Engine (Powered by PydanticAI)**: Leverages **Llama 3.3 (70B) via Groq** to intelligently negotiate scheduling conflicts and assign optimal faculty-to-subject combinations.
 *   **Conflict & Overlap Resolution**: Strict validation to ensure no faculty is scheduled for multiple sections at the same day and timeslot (utilizing multi-section busy maps).
 *   **Balanced Faculty Workloads**: Distributes hours evenly and respects workload caps across academic departments.
-*   **🆕 Sleek Landing Page**: A gorgeous, interactive product landing page featuring an active, animated CSS laptop sandbox simulation demonstrating the agentic auto-solving algorithm.
-*   **🆕 Simulation & Login Views**: Premium simulation modules including an administrative **Login Page** and **Settings Panel** for enterprise dashboard management.
-*   **🆕 Modern Premium UI**: Fully responsive light-themed dashboard with Glassmorphism, micro-animations, real-time analytics, and dynamic timetable grids.
+*   **Sleek Landing Page**: A gorgeous, interactive product landing page featuring an active, animated CSS laptop sandbox simulation demonstrating the agentic auto-solving algorithm.
+*   **Simulation & Login Views**: Premium simulation modules including an administrative **Login Page** and **Settings Panel** for enterprise dashboard management.
+*   **Modern Premium UI**: Fully responsive light-themed dashboard with Glassmorphism, micro-animations, real-time analytics, and dynamic timetable grids.
 *   **Dynamic CSV Parsing**: Instantly parse and analyze timeslots, subjects, and teacher constraints from CSV uploads.
-*   **🆕 Centralized Database Infrastructure**: Re-architected SQLite database path from nested backend folders to a unified, top-level `database/` directory for cleaner git isolation and automated database backups.
+*   **Centralized Database Infrastructure**: Re-architected SQLite database path from nested backend folders to a unified, top-level `database/` directory for cleaner git isolation and automated database backups.
 
 ---
 
@@ -34,9 +34,9 @@ Timetable_Bot/
 ├── frontend/                 # Vite + React Frontend
 │   ├── src/                  # React components & UI logic
 │   │   ├── components/       # Reusable UI views (Upload, Grid, Analytics, Sidebar...)
-│   │   │   ├── LandingPage.jsx # 🆕 Sleek interactive product presentation
-│   │   │   ├── LoginPage.jsx   # 🆕 Simulative portal authentication
-│   │   │   ├── SettingsView.jsx# 🆕 Centralized UI and API preference panel
+│   │   │   ├── LandingPage.jsx # Sleek interactive product presentation
+│   │   │   ├── LoginPage.jsx   # Simulative portal authentication
+│   │   │   ├── SettingsView.jsx# Centralized UI and API preference panel
 │   │   │   └── ...
 │   │   └── App.jsx           # Main App entry and state management
 │   ├── package.json          # Frontend dependencies and Vite scripts
