@@ -9,10 +9,38 @@ export default function TimetableGrid({ data, timeSlots, days, onUpdateEntry, on
   const [editHeaderValue, setEditHeaderValue] = useState("");
 
   const getEntry = (day, time) => {
-    return data.find(entry => entry.day === day && entry.time === time);
+    if (!time) return undefined;
+    const isLunchTime = time.toLowerCase().includes('lunch');
+    const isBreakTime = time.toLowerCase().includes('break');
+    
+    return data.find(entry => {
+      if (!entry || !entry.day || !entry.time) return false;
+      if (entry.day.toLowerCase() !== day.toLowerCase()) return false;
+      
+      const entryTime = entry.time.toLowerCase();
+      const entrySubj = (entry.subject || '').toLowerCase();
+      
+      if (isLunchTime) {
+        return entryTime.includes('lunch') || entrySubj.includes('lunch');
+      }
+      if (isBreakTime) {
+        return entryTime.includes('break') || entrySubj.includes('break');
+      }
+      
+      const normalize = (t) => {
+        if (!t) return '';
+        return t.toLowerCase().replace(/(am|pm)/g, '').replace(/[\s-().:]/g, '');
+      };
+      return normalize(entry.time) === normalize(time);
+    });
   };
 
+
   const breakColumns = new Set(timeSlots.filter(time => {
+    const timeLower = time.toLowerCase();
+    // If the timeslot header itself contains 'break' or 'lunch', it's always a break column
+    if (timeLower.includes('break') || timeLower.includes('lunch')) return true;
+    
     let hasBreak = false;
     for (const d of days) {
       const entry = getEntry(d, time);

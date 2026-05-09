@@ -20,9 +20,23 @@ export default function UploadView({ onGenerate }) {
   const [dragActive, setDragActive] = useState({ slots: false, faculty: false, subjects: false });
 
   // Inputs
+  const [department, setDepartment] = useState('CSE');
+  const [numLabs, setNumLabs] = useState(2);
+  const [physicsLabs, setPhysicsLabs] = useState(1);
+  const [chemistryLabs, setChemistryLabs] = useState(1);
+  const [computerLabs, setComputerLabs] = useState(1);
+  const [mechanicalLabs, setMechanicalLabs] = useState(1);
   const [academicCycle, setAcademicCycle] = useState('ODD');
   const [academicYear, setAcademicYear] = useState(1);
   const [error, setError] = useState(null);
+
+  const handleDepartmentChange = (newDept) => {
+    setDepartment(newDept);
+    if (newDept !== 'GLOBAL') {
+      const suffix = section.includes('-') ? section.split('-')[1] : '1A';
+      setSection(`${newDept}-${suffix}`);
+    }
+  };
 
   // Solver Stepper State
   const [generationStep, setGenerationStep] = useState(0);
@@ -83,13 +97,83 @@ export default function UploadView({ onGenerate }) {
     if (!csvText) return ['7:50 AM - 8:40 AM', '8:40 AM - 9:30 AM', '10:20 AM - 11:10 AM', '11:10 AM - 12:00 PM'];
     const lines = csvText.split('\n').map(l => l.trim()).filter(Boolean);
     const slots = [];
-    const startIdx = lines[0] && lines[0].toLowerCase().includes('time') ? 1 : 0;
+    
+    let periodColIdx = 0;
+    let startColIdx = -1;
+    let endColIdx = -1;
+    let timeColIdx = -1;
+    
+    if (lines[0]) {
+      const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+      
+      const periodIdx = headers.findIndex(h => h.includes('period'));
+      if (periodIdx !== -1) periodColIdx = periodIdx;
+      
+      const startIdx = headers.findIndex(h => h.includes('start') || h.includes('from'));
+      if (startIdx !== -1) startColIdx = startIdx;
+      
+      const endIdx = headers.findIndex(h => h.includes('end') || h.includes('to'));
+      if (endIdx !== -1) endColIdx = endIdx;
+      
+      const timeIdx = headers.findIndex(h => h.includes('time') || h.includes('slot'));
+      if (timeIdx !== -1) timeColIdx = timeIdx;
+    }
+    
+    if (startColIdx === -1 || endColIdx === -1) {
+      if (timeColIdx === -1) {
+        timeColIdx = 1;
+        periodColIdx = 0;
+      }
+    }
+    const parseCSVLine = (line) => {
+      const result = [];
+      let current = '';
+      let inQuotes = false;
+      for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+        if (char === '"') {
+          inQuotes = !inQuotes;
+        } else if (char === ',' && !inQuotes) {
+          result.push(current.trim());
+          current = '';
+        } else {
+          current += char;
+        }
+      }
+      result.push(current.trim());
+      return result.map(v => v.replace(/^"|"$/g, '').trim());
+    };
+
+    const startIdx = lines[0] && (lines[0].toLowerCase().includes('time') || lines[0].toLowerCase().includes('slot') || lines[0].toLowerCase().includes('period') || lines[0].toLowerCase().includes('start') || lines[0].toLowerCase().includes('end') || lines[0].toLowerCase().includes('from') || lines[0].toLowerCase().includes('to')) ? 1 : 0;
     for (let i = startIdx; i < lines.length; i++) {
-      const parts = lines[i].split(',');
-      if (parts[0]) slots.push(parts[0].trim());
+      const parts = parseCSVLine(lines[i]);
+      if (parts.length > 0) {
+        let timeVal = '';
+        if (startColIdx !== -1 && endColIdx !== -1 && parts[startColIdx] && parts[endColIdx]) {
+          timeVal = `${parts[startColIdx]} - ${parts[endColIdx]}`;
+        } else if (timeColIdx !== -1 && parts[timeColIdx]) {
+          timeVal = parts[timeColIdx];
+        } else if (parts[1]) {
+          timeVal = parts[1];
+        } else {
+          timeVal = parts[0];
+        }
+        
+        const periodVal = parts[periodColIdx] ? parts[periodColIdx] : "";
+        const cleanP = periodVal.toLowerCase();
+        const cleanT = timeVal.toLowerCase();
+        if (cleanP.includes('break') || cleanT.includes('break')) {
+          slots.push(cleanT.includes('break') ? timeVal : `BREAK (${timeVal})`);
+        } else if (cleanP.includes('lunch') || cleanT.includes('lunch')) {
+          slots.push(cleanT.includes('lunch') ? timeVal : `LUNCH (${timeVal})`);
+        } else {
+          slots.push(timeVal);
+        }
+      }
     }
     return slots.length > 0 ? slots : ['7:50 AM - 8:40 AM', '8:40 AM - 9:30 AM', '10:20 AM - 11:10 AM', '11:10 AM - 12:00 PM'];
   };
+
 
   const validateCSV = (text, type) => {
     if (!text || text.trim() === '') return { isValid: false, message: 'File is completely empty.' };
@@ -256,6 +340,12 @@ export default function UploadView({ onGenerate }) {
 
       const payload = {
         section,
+        department,
+        num_labs: numLabs,
+        num_physics_labs: physicsLabs,
+        num_chemistry_labs: chemistryLabs,
+        num_computer_labs: computerLabs,
+        num_mechanical_labs: mechanicalLabs,
         timeSlotsCsv,
         facultyCsv,
         subjectsCsv,
@@ -449,6 +539,98 @@ export default function UploadView({ onGenerate }) {
               <p className="leading-relaxed font-medium">
                 Standard classroom lectures are bypassed for 8th-semester students. Generation will auto-populate a dedicated Project Work / Internship schedule instantly.
               </p>
+            </div>
+          )}
+
+          {/* Department Selection */}
+          <div className="space-y-2">
+            <label className="block text-sm font-bold text-gray-800 text-center w-full">Department Filter</label>
+            <select
+              value={department}
+              onChange={(e) => handleDepartmentChange(e.target.value)}
+              className="block w-full px-3 py-2.5 text-sm border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-xl border font-medium bg-gray-50/50 hover:bg-gray-50 text-center transition"
+            >
+              <option value="CSE">Computer Science & Engineering (CSE)</option>
+              <option value="ADS">Applied Data Science (ADS)</option>
+              <option value="ECE">Electronics & Communication (ECE)</option>
+              <option value="MECH">Mechanical Engineering (MECH)</option>
+              <option value="GLOBAL">First Year</option>
+            </select>
+          </div>
+
+          {/* Department Lab Capacity */}
+          {department === 'GLOBAL' ? (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full bg-gray-50/50 p-4 rounded-2xl border border-gray-100 col-span-1 md:col-span-3">
+              <div className="space-y-2">
+                <label className="block text-xs font-bold text-gray-700 text-center w-full uppercase tracking-wider">Physics Lab</label>
+                <select
+                  value={physicsLabs}
+                  onChange={(e) => setPhysicsLabs(Number(e.target.value))}
+                  className="block w-full px-3 py-2 text-xs border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg border font-semibold bg-white text-center transition"
+                >
+                  <option value={0}>0 (No Session)</option>
+                  <option value={1}>1 Lab Room</option>
+                  <option value={2}>2 Lab Rooms</option>
+                  <option value={3}>3 Lab Rooms</option>
+                  <option value={4}>4 Lab Rooms</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <label className="block text-xs font-bold text-gray-700 text-center w-full uppercase tracking-wider">Chemistry Lab</label>
+                <select
+                  value={chemistryLabs}
+                  onChange={(e) => setChemistryLabs(Number(e.target.value))}
+                  className="block w-full px-3 py-2 text-xs border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg border font-semibold bg-white text-center transition"
+                >
+                  <option value={0}>0 (No Session)</option>
+                  <option value={1}>1 Lab Room</option>
+                  <option value={2}>2 Lab Rooms</option>
+                  <option value={3}>3 Lab Rooms</option>
+                  <option value={4}>4 Lab Rooms</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <label className="block text-xs font-bold text-gray-700 text-center w-full uppercase tracking-wider">Computer Lab</label>
+                <select
+                  value={computerLabs}
+                  onChange={(e) => setComputerLabs(Number(e.target.value))}
+                  className="block w-full px-3 py-2 text-xs border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg border font-semibold bg-white text-center transition"
+                >
+                  <option value={0}>0 (No Session)</option>
+                  <option value={1}>1 Lab Room</option>
+                  <option value={2}>2 Lab Rooms</option>
+                  <option value={3}>3 Lab Rooms</option>
+                  <option value={4}>4 Lab Rooms</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <label className="block text-xs font-bold text-gray-700 text-center w-full uppercase tracking-wider">Mechanical Lab</label>
+                <select
+                  value={mechanicalLabs}
+                  onChange={(e) => setMechanicalLabs(Number(e.target.value))}
+                  className="block w-full px-3 py-2 text-xs border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg border font-semibold bg-white text-center transition"
+                >
+                  <option value={0}>0 (No Session)</option>
+                  <option value={1}>1 Lab Room</option>
+                  <option value={2}>2 Lab Rooms</option>
+                  <option value={3}>3 Lab Rooms</option>
+                  <option value={4}>4 Lab Rooms</option>
+                </select>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <label className="block text-sm font-bold text-gray-800 text-center w-full">Physical Labs Available</label>
+              <select
+                value={numLabs}
+                onChange={(e) => setNumLabs(Number(e.target.value))}
+                className="block w-full px-3 py-2.5 text-sm border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-xl border font-medium bg-gray-50/50 hover:bg-gray-50 text-center transition"
+              >
+                <option value={1}>1 Physical Lab (Max 1 concurrent lab session)</option>
+                <option value={2}>2 Physical Labs (Max 2 concurrent lab sessions)</option>
+                <option value={3}>3 Physical Labs (Max 3 concurrent lab sessions)</option>
+                <option value={4}>4 Physical Labs (Max 4 concurrent lab sessions)</option>
+              </select>
             </div>
           )}
 

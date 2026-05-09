@@ -36,6 +36,19 @@ class SaveTimetableRequest(BaseModel):
 def read_root():
     return {"message": "Smart Timetable API is running."}
 
+def classify_lab_type(subject_name: str) -> str:
+    subj = subject_name.lower()
+    if "physics" in subj:
+        return "physics_lab"
+    elif "chemistry" in subj:
+        return "chemistry_lab"
+    elif "computer" in subj or "programming" in subj or "python" in subj or "data structures" in subj or "java" in subj or "web" in subj or "dbms" in subj or "database" in subj or "sql" in subj or "coding" in subj or "it lab" in subj or "ds lab" in subj or "ads lab" in subj or "software" in subj or "algorithm" in subj:
+        return "computer_lab"
+    elif "mechanical" in subj or "graphics" in subj or "workshop" in subj or "mech" in subj or "cad" in subj or "drawing" in subj or "manufacturing" in subj:
+        return "mechanical_lab"
+    else:
+        return "departmental_lab"
+
 @app.post("/api/generate-timetable")
 async def generate_timetable(data: dict):
     """
@@ -50,7 +63,15 @@ async def generate_timetable(data: dict):
         existing_timetables = []
         faculty_busy_map = {}
         faculty_workloads = {}
+        department_lab_busy_slots = {
+            "physics_lab": {},
+            "chemistry_lab": {},
+            "computer_lab": {},
+            "mechanical_lab": {},
+            "departmental_lab": {}
+        }
         academic_cycle = data.get("academic_cycle", "ODD")
+        req_dept = data.get("department", "GLOBAL").strip().upper()
         
         try:
             saved = get_saved_timetables()
@@ -58,8 +79,28 @@ async def generate_timetable(data: dict):
                 full_t = get_timetable_by_id(item["db_id"])
                 if full_t and "data" in full_t and "timetables" in full_t["data"]:
                     if full_t.get("academic_cycle", "ODD") == academic_cycle:
-                        existing_timetables.extend(full_t["data"]["timetables"])
                         for t in full_t["data"]["timetables"]:
+                            saved_section = t.get("section", "")
+                            if saved_section == data.get("section"):
+                                continue
+                                
+                            # 1. Track active physical lab room allocations GLOBALLY to prevent clashing between First Year & Higher Years
+                            for entry in t.get("entries", []):
+                                subj = entry.get("subject", "").lower()
+                                if "lab" in subj:
+                                    day = entry.get("day", "")
+                                    time = entry.get("time", "")
+                                    l_type = classify_lab_type(subj)
+                                    slot_key = f"{day}|{time}"
+                                    department_lab_busy_slots[l_type][slot_key] = department_lab_busy_slots[l_type].get(slot_key, 0) + 1
+                                    
+                            # 2. Filter busy teachers by selected department if not GLOBAL
+                            if req_dept != "GLOBAL":
+                                saved_dept = saved_section.split("-")[0].strip().upper() if "-" in saved_section else saved_section.strip().upper()
+                                if saved_dept != req_dept:
+                                    continue
+                                    
+                            existing_timetables.append(t)
                             for entry in t.get("entries", []):
                                 fac = entry.get("faculty", "")
                                 day = entry.get("day", "")
@@ -79,6 +120,7 @@ async def generate_timetable(data: dict):
         data["existing_timetables"] = existing_timetables
         data["faculty_busy_map"] = faculty_busy_map
         data["faculty_workloads"] = faculty_workloads
+        data["department_lab_busy_slots"] = department_lab_busy_slots
             
         result = await generate_timetable_agent(data)
         return {"status": "success", "data": result.model_dump()}
